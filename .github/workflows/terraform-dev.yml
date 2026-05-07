@@ -1,0 +1,75 @@
+name: Terraform Dev
+
+on:
+  pull_request:
+    paths:
+      - "environments/dev/**"
+      - "modules/**"
+      - ".github/workflows/terraform-dev.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "environments/dev/**"
+      - "modules/**"
+      - ".github/workflows/terraform-dev.yml"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose terraform action"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - plan
+          - apply
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: environments/dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::398875891485:role/github-actions-terraform-role 
+          aws-region: ap-northeast-2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan (PR)
+        if: github.event_name == 'pull_request'
+        run: terraform plan -var-file="terraform.tfvars"
+
+      - name: Terraform Plan (Push)
+        if: github.event_name == 'push'
+        run: terraform plan -var-file="terraform.tfvars"
+
+      - name: Terraform Plan (Manual)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan'
+        run: terraform plan -var-file="terraform.tfvars"
+
+      - name: Terraform Apply (Manual Only)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve -var-file="terraform.tfvars"

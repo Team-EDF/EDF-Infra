@@ -1,0 +1,82 @@
+name: Terraform Destroy Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: "Type DESTROY to destroy all dev infrastructure"
+        required: true
+        default: "NO"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-destroy:
+    if: github.event.inputs.confirm_destroy == 'DESTROY'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: environments/dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::398875891485:role/github-actions-terraform-role
+          aws-region: ap-northeast-2
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Check cluster existence
+        id: check_cluster
+        shell: bash
+        run: |
+          if aws eks describe-cluster \
+            --region ap-northeast-2 \
+            --name edf-cluster >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update kubeconfig
+        if: steps.check_cluster.outputs.exists == 'true'
+        run: |
+          aws eks update-kubeconfig \
+          --region ap-northeast-2 \
+          --name edf-cluster
+
+      - name: Delete ingress-nginx Service
+        id: delete_ingress
+        if: steps.check_cluster.outputs.exists == 'true'
+        run: |
+          kubectl delete service ingress-nginx-controller \
+            -n ingress-nginx \
+            --ignore-not-found=true
+
+          kubectl wait --for=delete service ingress-nginx-controller \
+            -n ingress-nginx \
+            --timeout=120s || true
+
+      - name: Terraform Init
+        if: steps.delete_ingress.outcome == 'success'
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan Destroy
+        run: terraform plan -destroy -var-file="terraform.tfvars"
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -var-file="terraform.tfvars"

@@ -1,0 +1,23 @@
+.env
+.idea
+.vscode
+.DS_Store
+
+# Backend
+backend/build
+backend/.gradle
+backend/out
+
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/build
+
+# Infra
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
+
+!terraform.tfvars
