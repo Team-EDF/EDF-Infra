@@ -48,7 +48,7 @@ db_engine                 = "postgres"
 db_engine_version         = "16.13"
 db_major_engine_version   = "16"
 db_instance_class         = "db.t3.micro"
-db_parameter_group_family = "postgre16"
+db_parameter_group_family = "postgres16"
 
 db_port = 5432
 
