@@ -47,7 +47,7 @@ jobs:
         run: |
           if aws eks describe-cluster \
             --region ap-northeast-2 \
-            --name edf-cluster >/dev/null 2>&1; then
+            --name edf-dev-edf-cluster >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
@@ -58,7 +58,7 @@ jobs:
         run: |
           aws eks update-kubeconfig \
           --region ap-northeast-2 \
-          --name edf-cluster
+          --name edf-dev-edf-cluster
 
       - name: Delete ingress-nginx Service
         id: delete_ingress
@@ -73,7 +73,6 @@ jobs:
             --timeout=120s || true
 
       - name: Terraform Init
-        if: steps.delete_ingress.outcome == 'success'
         run: terraform init
 
       - name: Terraform Validate
