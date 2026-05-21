@@ -1,6 +1,6 @@
 aws_region   = "ap-northeast-2"
 project_name = "EDF-System"
-env          = "edf-dev"
+env          = "edf"
 
 # -------------------------
 # VPC
@@ -37,7 +37,7 @@ azs_private_db = [
   "ap-northeast-2c"
 ]
 
-cluster_name = "edf-cluster"
+cluster_name = "cluster"
 
 # -------------------------
 # RDS (PostGre)
