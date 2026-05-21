@@ -102,3 +102,18 @@ output "ecr_repository_names" {
   description = "ECR repository names"
   value       = module.ecr.repository_names
 }
+
+output "aws_load_balancer_controller_role_arn" {
+  description = "IAM role ARN for AWS Load Balancer Controller"
+  value       = module.iam_autoscaler.aws_load_balancer_controller_role_arn
+}
+
+output "aws_load_balancer_controller_policy_arn" {
+  description = "IAM policy ARN for AWS Load Balancer Controller"
+  value       = module.iam_autoscaler.aws_load_balancer_controller_policy_arn
+}
+
+output "aws_load_balancer_controller_service_account_name" {
+  description = "Kubernetes ServiceAccount name for AWS Load Balancer Controller"
+  value       = module.iam_autoscaler.aws_load_balancer_controller_service_account_name
+}
