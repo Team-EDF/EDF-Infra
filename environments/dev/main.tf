@@ -2,6 +2,14 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_eks_cluster" "main" {
+  name = module.eks.cluster_name
+}
+
+data "aws_eks_cluster_auth" "main" {
+  name = module.eks.cluster_name
+}
+
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.main.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.main.certificate_authority[0].data)
