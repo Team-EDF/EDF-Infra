@@ -10,6 +10,7 @@ provider "aws" {
 # }
 
 provider "kubernetes" {
+  # 회원님의 module.eks 아웃풋 장부 이름들과 100% 일치시켰습니다.
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
@@ -19,6 +20,7 @@ provider "kubernetes" {
     args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
   }
 }
+
 locals {
   common_tags = {
     Project     = var.project_name
