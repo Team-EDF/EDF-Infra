@@ -19,14 +19,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encrypt" {
 resource "aws_s3_bucket_public_access_block" "pab" {
   bucket = aws_s3_bucket.s3.id
 
-  block_public_acls = false
-  block_public_policy = false
-  ignore_public_acls = false
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
   restrict_public_buckets = false
 }
 
 resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = aws_s3_bucket.s3.id
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.pab
+  ]
 
   policy = jsonencode({
     Version = "2012-10-17"
