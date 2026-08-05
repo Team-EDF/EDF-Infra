@@ -29,6 +29,20 @@ locals {
   }
 }
 
+# Backend와 관련 리소스가 사용할 애플리케이션 Namespace를 Terraform이 먼저 만든다.
+resource "kubernetes_namespace_v1" "edf" {
+  metadata {
+    name = var.backend_kubernetes_namespace
+
+    labels = {
+      "app.kubernetes.io/part-of" = "edf"
+      "managed-by"                = "terraform"
+    }
+  }
+
+  depends_on = [module.eks]
+}
+
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -196,6 +210,20 @@ module "iam_autoscaler" {
 module "s3" {
   source = "../../modules/s3"
 
-  bucket_name     = var.bucket_name
-  s3_uploader_arn = var.s3_uploader_arn
+  env         = var.env
+  bucket_name = var.bucket_name
+
+  object_prefix                          = var.s3_object_prefix
+  force_destroy                          = var.s3_force_destroy
+  versioning_enabled                     = var.s3_versioning_enabled
+  noncurrent_version_expiration_days     = var.s3_noncurrent_version_expiration_days
+  abort_incomplete_multipart_upload_days = var.s3_abort_incomplete_multipart_upload_days
+
+  oidc_provider_arn = module.iam_autoscaler.oidc_provider_arn
+  oidc_issuer_url   = module.eks.cluster_oidc_issuer
+
+  backend_kubernetes_namespace = kubernetes_namespace_v1.edf.metadata[0].name
+  backend_service_account_name = var.backend_service_account_name
+
+  common_tags = local.common_tags
 }

@@ -500,14 +500,51 @@ EOF
 }
 
 # -------------------------
-# S3
+# S3 private user uploads
 # -------------------------
 variable "bucket_name" {
-  description = "Bucket Name"
+  description = "Globally unique private user-upload bucket name"
   type        = string
 }
 
-variable "s3_uploader_arn" {
-  description = "S3 Uploader ARN"
+variable "s3_object_prefix" {
+  description = "Object prefix managed by the backend"
   type        = string
+  default     = "receipts"
+}
+
+variable "s3_force_destroy" {
+  description = "Whether Terraform may delete the bucket when it contains objects"
+  type        = bool
+  default     = false
+}
+
+variable "s3_versioning_enabled" {
+  description = "Enable object versioning for uploaded files"
+  type        = bool
+  default     = true
+}
+
+variable "s3_noncurrent_version_expiration_days" {
+  description = "Days before noncurrent object versions are deleted"
+  type        = number
+  default     = 30
+}
+
+variable "s3_abort_incomplete_multipart_upload_days" {
+  description = "Days before incomplete multipart uploads are deleted"
+  type        = number
+  default     = 7
+}
+
+variable "backend_kubernetes_namespace" {
+  description = "Kubernetes namespace containing the backend"
+  type        = string
+  default     = "edf"
+}
+
+variable "backend_service_account_name" {
+  description = "IRSA-enabled Kubernetes ServiceAccount used by the backend"
+  type        = string
+  default     = "backend-service-account"
 }

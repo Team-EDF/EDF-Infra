@@ -117,3 +117,29 @@ output "aws_load_balancer_controller_service_account_name" {
   description = "Kubernetes ServiceAccount name for AWS Load Balancer Controller"
   value       = module.iam_autoscaler.aws_load_balancer_controller_service_account_name
 }
+
+output "private_upload_bucket_name" {
+  description = "Private S3 bucket used for receipt and statement uploads"
+  value       = module.s3.s3_bucket_name
+}
+
+output "private_upload_bucket_arn" {
+  description = "ARN of the private upload bucket"
+  value       = module.s3.s3_bucket_arn
+}
+
+output "private_upload_object_prefix" {
+  description = "Object prefix managed by the backend"
+  value       = module.s3.s3_object_prefix
+}
+
+output "backend_s3_role_arn" {
+  description = "IRSA role ARN for backend S3 access"
+  value       = module.s3.backend_s3_role_arn
+}
+
+output "backend_service_account_name" {
+  description = "Kubernetes ServiceAccount that the backend Deployment must use"
+  value       = module.s3.backend_service_account_name
+}
+
