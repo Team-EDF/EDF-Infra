@@ -132,7 +132,7 @@ eks_bootstrap_cluster_creator_admin_permissions = true
 eks_auto_mode_enabled                           = false
 
 eks_access_principal_arn    = "arn:aws:iam::398875891485:user/eks-user"
-github_actions_app_role_arn = "arn:aws:iam::398875891485:role/github-actions-app-role-edf"
+github_actions_app_role_arn = "arn:aws:iam::398875891485:role/github-actions-application-role"
 # -------------------------
 # ECR
 # -------------------------
