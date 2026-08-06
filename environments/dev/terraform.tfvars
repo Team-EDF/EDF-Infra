@@ -131,13 +131,13 @@ eks_authentication_mode                         = "API_AND_CONFIG_MAP"
 eks_bootstrap_cluster_creator_admin_permissions = true
 eks_auto_mode_enabled                           = false
 
-eks_access_principal_arn = "arn:aws:iam::398875891485:user/eks-user"
+eks_access_principal_arn    = "arn:aws:iam::398875891485:user/eks-user"
+github_actions_app_role_arn = "arn:aws:iam::398875891485:role/github-actions-app-role-edf"
 # -------------------------
 # ECR
 # -------------------------
 ecr_repository_names = [
   "edf-backend",
-  "edf-frontend",
   "edf-ai"
 ]
 
@@ -149,8 +149,18 @@ ecr_kms_key_arn             = null
 ecr_create_lifecycle_policy = true
 
 # -------------------------
-# S3
+# S3 private user uploads
 # -------------------------
-bucket_name     = "edf-webpage-images-398875891485"
-s3_uploader_arn = "arn:aws:iam::398875891485:user/eks-user"
+# Kotlin 앱은 AWS 자격 증명을 갖지 않는다.
+# Backend Pod만 IRSA로 receipts/ 경로를 읽고 쓸 수 있다.
+bucket_name = "edf-user-uploads-edf-398875891485"
+
+s3_object_prefix                          = "receipts"
+s3_force_destroy                          = false
+s3_versioning_enabled                     = true
+s3_noncurrent_version_expiration_days     = 30
+s3_abort_incomplete_multipart_upload_days = 7
+
+backend_kubernetes_namespace = "edf"
+backend_service_account_name = "backend-service-account"
 
