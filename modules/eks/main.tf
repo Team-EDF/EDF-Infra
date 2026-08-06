@@ -105,24 +105,47 @@ resource "aws_vpc_security_group_ingress_rule" "node_from_node_all" {
   description                  = "Allow all traffic between worker nodes"
 }
 
-# Node from cluster admission webhook traffic
+#####################################################
+# AWS Load Balancer Controller Webhook
+#####################################################
+
+# 추가로 지정한 EKS Control Plane SG -> Worker Node Webhook
 resource "aws_vpc_security_group_ingress_rule" "node_from_cluster_tls" {
   security_group_id            = aws_security_group.node.id
   referenced_security_group_id = aws_security_group.cluster.id
-  from_port                    = 8443
-  to_port                      = 8443
-  ip_protocol                  = "tcp"
-  description                  = "for admission webhook"
+
+  from_port   = 9443
+  to_port     = 9443
+  ip_protocol = "tcp"
+
+  description = "Allow EKS control plane to access AWS Load Balancer Controller webhook"
 }
 
-# cluster from Node admission webhook traffic
+# EKS가 자동 생성한 Cluster SG -> Worker Node Webhook
+resource "aws_vpc_security_group_ingress_rule" "node_from_eks_managed_cluster_webhook" {
+  security_group_id = aws_security_group.node.id
+
+  referenced_security_group_id = (
+    aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
+  )
+
+  from_port   = 9443
+  to_port     = 9443
+  ip_protocol = "tcp"
+
+  description = "Allow EKS managed cluster security group to access ALB webhook"
+}
+
+# 추가로 지정한 EKS Control Plane SG -> Worker Node Webhook
 resource "aws_vpc_security_group_egress_rule" "cluster_from_node_tls" {
   security_group_id            = aws_security_group.cluster.id
   referenced_security_group_id = aws_security_group.node.id
-  from_port                    = 8443
-  to_port                      = 8443
-  ip_protocol                  = "tcp"
-  description                  = "for admission webhook"
+
+  from_port   = 9443
+  to_port     = 9443
+  ip_protocol = "tcp"
+
+  description = "Allow EKS control plane egress to ALB controller webhook"
 }
 
 #####################################################
