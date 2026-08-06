@@ -131,13 +131,13 @@ eks_authentication_mode                         = "API_AND_CONFIG_MAP"
 eks_bootstrap_cluster_creator_admin_permissions = true
 eks_auto_mode_enabled                           = false
 
-eks_access_principal_arn = "arn:aws:iam::398875891485:user/eks-user"
+eks_access_principal_arn    = "arn:aws:iam::398875891485:user/eks-user"
+github_actions_app_role_arn = "arn:aws:iam::398875891485:role/github-actions-app-role-edf"
 # -------------------------
 # ECR
 # -------------------------
 ecr_repository_names = [
   "edf-backend",
-  "edf-frontend",
   "edf-ai"
 ]
 

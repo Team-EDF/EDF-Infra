@@ -432,6 +432,11 @@ variable "eks_access_principal_arn" {
   type        = string
 }
 
+variable "github_actions_app_role_arn" {
+  description = "Existing GitHub Actions application role granted EKS admin access"
+  type        = string
+}
+
 # -------------------------
 # ECR
 # -------------------------

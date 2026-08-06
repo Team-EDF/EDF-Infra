@@ -104,7 +104,8 @@ module "eks" {
   max_unavailable = var.eks_max_unavailable
 
   admin_principals = {
-    eks_user = var.eks_access_principal_arn
+    eks_user          = var.eks_access_principal_arn
+    github_app_action = var.github_actions_app_role_arn
   }
 
   common_tags = local.common_tags
