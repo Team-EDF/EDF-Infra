@@ -553,3 +553,15 @@ variable "backend_service_account_name" {
   type        = string
   default     = "backend-service-account"
 }
+
+variable "ai_kubernetes_namespace" {
+  description = "Kubernetes namespace containing the AI service"
+  type        = string
+  default     = "edf"
+}
+
+variable "ai_service_account_name" {
+  description = "IRSA-enabled Kubernetes ServiceAccount used by the AI Deployment"
+  type        = string
+  default     = "ai-service-account"
+}
