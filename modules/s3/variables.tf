@@ -65,6 +65,18 @@ variable "backend_service_account_name" {
   default     = "backend-service-account"
 }
 
+variable "ai_kubernetes_namespace" {
+  description = "Kubernetes namespace of the AI ServiceAccount"
+  type        = string
+  default     = "edf"
+}
+
+variable "ai_service_account_name" {
+  description = "Kubernetes ServiceAccount used by the AI Deployment"
+  type        = string
+  default     = "ai-service-account"
+}
+
 variable "common_tags" {
   description = "Common AWS resource tags"
   type        = map(string)

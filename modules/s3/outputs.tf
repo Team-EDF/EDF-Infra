@@ -27,3 +27,14 @@ output "backend_service_account_name" {
   description = "Kubernetes ServiceAccount used by the backend Deployment"
   value       = kubernetes_service_account_v1.backend.metadata[0].name
 }
+
+output "ai_s3_role_arn" {
+  description = "IRSA role ARN used by the AI ServiceAccount"
+  value       = aws_iam_role.ai_s3.arn
+}
+
+output "ai_service_account_name" {
+  description = "Kubernetes ServiceAccount used by the AI Deployment"
+  value       = kubernetes_service_account_v1.ai.metadata[0].name
+}
+

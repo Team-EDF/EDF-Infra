@@ -143,3 +143,13 @@ output "backend_service_account_name" {
   value       = module.s3.backend_service_account_name
 }
 
+output "ai_s3_role_arn" {
+  description = "IRSA role ARN for AI S3 access"
+  value       = module.s3.ai_s3_role_arn
+}
+
+output "ai_service_account_name" {
+  description = "Kubernetes ServiceAccount that the AI Deployment must use"
+  value       = module.s3.ai_service_account_name
+}
+
