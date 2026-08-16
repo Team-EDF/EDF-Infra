@@ -226,5 +226,8 @@ module "s3" {
   backend_kubernetes_namespace = kubernetes_namespace_v1.edf.metadata[0].name
   backend_service_account_name = var.backend_service_account_name
 
+  ai_kubernetes_namespace = kubernetes_namespace_v1.edf.metadata[0].name
+  ai_service_account_name = var.ai_service_account_name
+
   common_tags = local.common_tags
 }

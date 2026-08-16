@@ -164,3 +164,6 @@ s3_abort_incomplete_multipart_upload_days = 7
 backend_kubernetes_namespace = "edf"
 backend_service_account_name = "backend-service-account"
 
+ai_kubernetes_namespace = "edf"
+ai_service_account_name = "ai-service-account"
+
