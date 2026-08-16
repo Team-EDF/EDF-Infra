@@ -1,6 +1,7 @@
 locals {
   oidc_provider_url_without_scheme = replace(var.oidc_issuer_url, "https://", "")
   backend_service_account_subject  = "system:serviceaccount:${var.backend_kubernetes_namespace}:${var.backend_service_account_name}"
+  ai_service_account_subject       = "system:serviceaccount:${var.ai_kubernetes_namespace}:${var.ai_service_account_name}"
   normalized_object_prefix         = trimsuffix(trimprefix(var.object_prefix, "/"), "/")
 }
 
@@ -231,3 +232,101 @@ resource "kubernetes_service_account_v1" "backend" {
 
   depends_on = [aws_iam_role_policy_attachment.backend_s3]
 }
+
+#####################################################
+# AI Pod 전용 S3 권한(IRSA)
+#####################################################
+
+# AI는 기존 Backend와 동일한 private upload bucket의 receipts/ prefix를 사용한다.
+# 별도 S3 버킷을 추가하지 않고 AI 전용 IAM Role만 분리한다.
+resource "aws_iam_policy" "ai_s3" {
+  name        = "${var.env}-ai-private-upload-s3-policy"
+  description = "Least-privilege S3 access for EDF AI to the private upload bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "ReadBucketLocation"
+        Effect   = "Allow"
+        Action   = "s3:GetBucketLocation"
+        Resource = aws_s3_bucket.s3.arn
+      },
+      {
+        Sid    = "ManageReceiptObjects"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Resource = "${aws_s3_bucket.s3.arn}/${local.normalized_object_prefix}/*"
+      }
+    ]
+  })
+
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "${var.env}-ai-private-upload-s3-policy"
+    }
+  )
+}
+
+resource "aws_iam_role" "ai_s3" {
+  name = "${var.env}-ai-private-upload-s3-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = var.oidc_provider_arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_url_without_scheme}:aud" = "sts.amazonaws.com"
+            "${local.oidc_provider_url_without_scheme}:sub" = local.ai_service_account_subject
+          }
+        }
+      }
+    ]
+  })
+
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "${var.env}-ai-private-upload-s3-role"
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "ai_s3" {
+  role       = aws_iam_role.ai_s3.name
+  policy_arn = aws_iam_policy.ai_s3.arn
+}
+
+# EDF-APP의 AI Deployment에서 serviceAccountName=ai-service-account를 사용해야
+# 이 IRSA Role이 실제 AI Pod에 주입된다.
+resource "kubernetes_service_account_v1" "ai" {
+  metadata {
+    name      = var.ai_service_account_name
+    namespace = var.ai_kubernetes_namespace
+
+    labels = {
+      "app.kubernetes.io/name"      = "ai"
+      "app.kubernetes.io/component" = "ai"
+      "app.kubernetes.io/part-of"   = "edf"
+    }
+
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.ai_s3.arn
+    }
+  }
+
+  automount_service_account_token = true
+
+  depends_on = [aws_iam_role_policy_attachment.ai_s3]
+}
+
