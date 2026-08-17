@@ -118,7 +118,7 @@ eks_public_access_cidrs = [
 ]
 
 eks_capacity_type  = "ON_DEMAND"
-eks_instance_types = ["t3.small"]
+eks_instance_types = ["t3.medium"]
 eks_ami_type       = "AL2023_x86_64_STANDARD"
 eks_disk_size      = 20
 
