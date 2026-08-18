@@ -3,6 +3,7 @@ locals {
   backend_service_account_subject  = "system:serviceaccount:${var.backend_kubernetes_namespace}:${var.backend_service_account_name}"
   ai_service_account_subject       = "system:serviceaccount:${var.ai_kubernetes_namespace}:${var.ai_service_account_name}"
   normalized_object_prefix         = trimsuffix(trimprefix(var.object_prefix, "/"), "/")
+  normalized_ai_model_prefix       = trimsuffix(trimprefix(var.ai_model_prefix, "/"), "/")
 }
 
 resource "aws_s3_bucket" "s3" {
@@ -251,6 +252,26 @@ resource "aws_iam_policy" "ai_s3" {
         Effect   = "Allow"
         Action   = "s3:GetBucketLocation"
         Resource = aws_s3_bucket.s3.arn
+      },
+      {
+        Sid      = "ListSbertModelPrefix"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = aws_s3_bucket.s3.arn
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              local.normalized_ai_model_prefix,
+              "${local.normalized_ai_model_prefix}/*"
+            ]
+          }
+        }
+      },
+      {
+        Sid      = "ReadSbertModelObjects"
+        Effect   = "Allow"
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.s3.arn}/${local.normalized_ai_model_prefix}/*"
       },
       {
         Sid    = "ManageReceiptObjects"

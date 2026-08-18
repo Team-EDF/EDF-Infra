@@ -82,3 +82,15 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+
+variable "ai_model_prefix" {
+  description = "Read-only S3 prefix containing the deployed SBERT model"
+  type        = string
+  default     = "models/greenstep_sbert_v2"
+
+  validation {
+    condition     = length(trim(var.ai_model_prefix, "/")) > 0
+    error_message = "ai_model_prefix must not be empty."
+  }
+}
