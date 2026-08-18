@@ -122,9 +122,9 @@ eks_instance_types = ["t3.medium"]
 eks_ami_type       = "AL2023_x86_64_STANDARD"
 eks_disk_size      = 20
 
-eks_desired_size    = 3
-eks_min_size        = 3
-eks_max_size        = 8
+eks_desired_size    = 2
+eks_min_size        = 2
+eks_max_size        = 2
 eks_max_unavailable = 1
 
 eks_authentication_mode                         = "API_AND_CONFIG_MAP"
